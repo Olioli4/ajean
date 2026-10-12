@@ -81,12 +81,27 @@ option,optgroup{background:var(--panel);color:var(--text)}
 #lc-chip .lc-chip-lbl{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #lc-chip .lc-chip-x{flex:none;font-weight:700}
 #lc-chip.failed{border-color:var(--err);color:var(--err)}
+/* Lanceurs du mode tiroir (tâches / historique) : mêmes règles d'affichage que le
+   bouton ☰ — ils n'existent que quand la barre est en tiroir et fermée. Placés en
+   haut à DROITE pour ne pas pousser la pastille d'installation moteur, qui suit le
+   ☰ à gauche (cf. #lc-chip). */
+.side-launch{display:none;align-items:center;justify-content:center;position:fixed;top:calc(10px + env(safe-area-inset-top));z-index:20;background:var(--panel);border:1px solid var(--border);color:var(--text);width:40px;height:40px;border-radius:6px;cursor:pointer;touch-action:manipulation}
+#tasks-act{right:calc(56px + env(safe-area-inset-right))}
+#hist-act{right:calc(10px + env(safe-area-inset-right))}
+.side-launch svg{display:block;width:18px;height:18px}
+.side-launch:hover{color:var(--accent)}
+.side-launch:active{transform:scale(.92)}
+/* Compte des tâches activées reporté sur l'icône : le panneau étant caché dans ce
+   mode, c'est là que l'on voit qu'une tâche tourne (« ! »). */
+.side-launch-dot{display:none;position:absolute;top:3px;right:5px;font-size:9px;font-weight:700;line-height:1;color:var(--accent)}
+.side-launch-dot.on{display:block}
 @media (max-width:720px){
   .side{position:fixed;inset:0 auto 0 0;width:80%;max-width:320px;z-index:15;transform:translateX(-100%);transition:transform .2s;background:var(--bg);padding-top:calc(16px + env(safe-area-inset-top));padding-left:calc(16px + env(safe-area-inset-left))}
   .side.open{transform:translateX(0)}
   #menubtn,#backdrop.open{display:block}
   #lc-chip:not([hidden]){display:flex}
-  body.drawer-open #menubtn,body.drawer-open #lc-chip{display:none}
+  .side-launch{display:flex}
+  body.drawer-open #menubtn,body.drawer-open #lc-chip,body.drawer-open .side-launch{display:none}
   .main{width:100%}
   #chat{padding:60px 8px 12px}
   .msg{max-width:92%}
@@ -772,8 +787,9 @@ textarea.sctl{min-height:76px;resize:vertical;line-height:1.5}
 [data-hide-side="1"] .side.open{transform:translateX(0)}
 [data-hide-side="1"] #menubtn{display:block}
 [data-hide-side="1"] #lc-chip:not([hidden]){display:flex}
+[data-hide-side="1"] .side-launch{display:flex}
 [data-hide-side="1"] #backdrop.open{display:block}
-[data-hide-side="1"] body.drawer-open #menubtn,[data-hide-side="1"] body.drawer-open #lc-chip{display:none}
+[data-hide-side="1"] body.drawer-open #menubtn,[data-hide-side="1"] body.drawer-open #lc-chip,[data-hide-side="1"] body.drawer-open .side-launch{display:none}
 [data-hide-side="1"] .main{width:100%}
 /* Hauteur animée en JS (mesure scrollHeight → 0) plutôt que grid 1fr→0fr qui
    peut « dépasser ». overflow:hidden clippe le contenu pendant tout le repli.
@@ -842,6 +858,9 @@ textarea.sctl{min-height:76px;resize:vertical;line-height:1.5}
   h2,details>summary{font-size:13px}
   #menubtn{width:32px;height:32px;font-size:15px;top:calc(6px + env(safe-area-inset-top))}
   #lc-chip{height:32px;font-size:11px;left:calc(46px + env(safe-area-inset-left));top:calc(6px + env(safe-area-inset-top))}
+  .side-launch{width:32px;height:32px;top:calc(6px + env(safe-area-inset-top))}
+  #tasks-act{right:calc(46px + env(safe-area-inset-right))}
+  #hist-act{right:calc(6px + env(safe-area-inset-right))}
 }
 /* --- Backend llama.cpp (2 modes : rapide / optimisée) --------------------- */
 .lc-head{font-size:12px;line-height:1.5}

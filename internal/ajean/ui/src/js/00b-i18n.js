@@ -49,6 +49,7 @@ function t(key) {
 //   data-i18n="clé"                          → textContent
 //   data-i18n="clé" data-i18n-html            → innerHTML (texte avec <b>/<br> etc.)
 //   data-i18n="clé" data-i18n-attr="title"    → pose l'ATTRIBUT nommé plutôt que le contenu
+//                                             (liste possible : « title aria-label »)
 function applyI18n(root) {
 	root = root || document;
 	var nodes = root.querySelectorAll('[data-i18n]');
@@ -58,7 +59,10 @@ function applyI18n(root) {
 		var val = t(key);
 		var attr = el.getAttribute('data-i18n-attr');
 		if (attr) {
-			el.setAttribute(attr, val);
+			// Plusieurs attributs d'un coup (« title aria-label ») : l'infobulle et le
+			// libellé accessible suivent la langue ensemble, d'un seul markage.
+			var names = attr.split(/\s+/);
+			for (var k = 0; k < names.length; k++) { if (names[k]) el.setAttribute(names[k], val); }
 		} else if (el.hasAttribute('data-i18n-html')) {
 			el.innerHTML = val;
 		} else {

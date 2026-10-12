@@ -633,6 +633,24 @@ function closeHistoryModal(){
   // bouton de bascule menu / historique change de vue. Sur mobile, le tiroir se referme.
   if(document.body.classList.contains('drawer-open')) toggleSide();
 }
+// ── Lanceurs du mode tiroir (icônes posées hors du panneau) -------------------
+// Le tiroir fermé ne montre que le bouton ☰ : rejoindre l'historique coûtait 2
+// clics, les tâches 3 avec tout le menu à dérouler. Ces lanceurs vont droit à la
+// cible : ils ouvrent le tiroir s'il est fermé, basculent la vue demandée, et pour
+// les tâches déroulent leur section et l'amènent au centre (même geste que
+// 07-models.js pour un modèle).
+function openSideTo(hist, sectionId){
+  if(viewOn('hide-side') && !document.body.classList.contains('drawer-open')) toggleSide();
+  if(hist){
+    if(!HIST_VIEW) showSideView(true);
+    loadHistory();
+    return;
+  }
+  if(HIST_VIEW) showSideView(false);
+  const d = sectionId ? document.getElementById(sectionId) : null;
+  if(d){ d.open = true; d.scrollIntoView({block:'center'}); }
+}
+function launchHistory(){ openSideTo(true, ''); }
 function fmtHistDate(ms){
   const d = new Date(ms||0);
   try{ return d.toLocaleString([], {dateStyle:'medium', timeStyle:'short'}); }

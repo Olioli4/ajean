@@ -30,12 +30,21 @@ option,optgroup{background:var(--panel);color:var(--text)}
 #lc-chip .lc-chip-lbl{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #lc-chip .lc-chip-x{flex:none;font-weight:700}
 #lc-chip.failed{border-color:var(--err);color:var(--err)}
+.side-launch{display:none;align-items:center;justify-content:center;position:fixed;top:calc(10px + env(safe-area-inset-top));z-index:20;background:var(--panel);border:1px solid var(--border);color:var(--text);width:40px;height:40px;border-radius:6px;cursor:pointer;touch-action:manipulation}
+#tasks-act{right:calc(56px + env(safe-area-inset-right))}
+#hist-act{right:calc(10px + env(safe-area-inset-right))}
+.side-launch svg{display:block;width:18px;height:18px}
+.side-launch:hover{color:var(--accent)}
+.side-launch:active{transform:scale(.92)}
+.side-launch-dot{display:none;position:absolute;top:3px;right:5px;font-size:9px;font-weight:700;line-height:1;color:var(--accent)}
+.side-launch-dot.on{display:block}
 @media (max-width:720px){
   .side{position:fixed;inset:0 auto 0 0;width:80%;max-width:320px;z-index:15;transform:translateX(-100%);transition:transform .2s;background:var(--bg);padding-top:calc(16px + env(safe-area-inset-top));padding-left:calc(16px + env(safe-area-inset-left))}
   .side.open{transform:translateX(0)}
   #menubtn,#backdrop.open{display:block}
   #lc-chip:not([hidden]){display:flex}
-  body.drawer-open #menubtn,body.drawer-open #lc-chip{display:none}
+  .side-launch{display:flex}
+  body.drawer-open #menubtn,body.drawer-open #lc-chip,body.drawer-open .side-launch{display:none}
   .main{width:100%}
   #chat{padding:60px 8px 12px}
   .msg{max-width:92%}
@@ -455,8 +464,9 @@ textarea.sctl{min-height:76px;resize:vertical;line-height:1.5}
 [data-hide-side="1"] .side.open{transform:translateX(0)}
 [data-hide-side="1"] #menubtn{display:block}
 [data-hide-side="1"] #lc-chip:not([hidden]){display:flex}
+[data-hide-side="1"] .side-launch{display:flex}
 [data-hide-side="1"] #backdrop.open{display:block}
-[data-hide-side="1"] body.drawer-open #menubtn,[data-hide-side="1"] body.drawer-open #lc-chip{display:none}
+[data-hide-side="1"] body.drawer-open #menubtn,[data-hide-side="1"] body.drawer-open #lc-chip,[data-hide-side="1"] body.drawer-open .side-launch{display:none}
 [data-hide-side="1"] .main{width:100%}
 .msg.collapsible .bodywrap{overflow:hidden;transition:height .42s cubic-bezier(.4,0,.2,1),width .42s cubic-bezier(.4,0,.2,1),opacity .3s ease,margin-top .42s cubic-bezier(.4,0,.2,1);opacity:1;margin-top:4px}
 .msg.collapsible .bodywrap>.body{min-width:0}
@@ -494,6 +504,9 @@ textarea.sctl{min-height:76px;resize:vertical;line-height:1.5}
   h2,details>summary{font-size:13px}
   #menubtn{width:32px;height:32px;font-size:15px;top:calc(6px + env(safe-area-inset-top))}
   #lc-chip{height:32px;font-size:11px;left:calc(46px + env(safe-area-inset-left));top:calc(6px + env(safe-area-inset-top))}
+  .side-launch{width:32px;height:32px;top:calc(6px + env(safe-area-inset-top))}
+  #tasks-act{right:calc(46px + env(safe-area-inset-right))}
+  #hist-act{right:calc(6px + env(safe-area-inset-right))}
 }
 .lc-head{font-size:12px;line-height:1.5}
 .lc-modes{display:flex;flex-direction:column}
@@ -1693,6 +1706,8 @@ body.hist-jean #side-hist .hist-search,body.hist-jean #sess-count,body.hist-jean
 body.jean-mode #ctx-compactions{display:none!important}
 </style></head><body>
 <button id="menubtn" onclick="toggleSide()" aria-label="Menu" title="Menu"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+<button id="tasks-act" class="side-launch" onclick="launchTasks()" title="Tâches" aria-label="Tâches" data-i18n="tasks.title" data-i18n-attr="title aria-label"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h9M4 12h9M4 18h5"/><path d="M14.5 17.5l2 2 4-5"/></svg><span id="tasks-act-dot" class="side-launch-dot"></span></button>
+<button id="hist-act" class="side-launch" onclick="launchHistory()" title="Historique" aria-label="Historique" data-i18n="chat.history_btn" data-i18n-attr="title aria-label"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg></button>
 <button id="lc-chip" onclick="lcChipOpen()" hidden></button>
 <div id="backdrop" onclick="toggleSide()"></div>
 <div class="side" id="side">
@@ -5640,7 +5655,8 @@ function applyI18n(root) {
 		var val = t(key);
 		var attr = el.getAttribute('data-i18n-attr');
 		if (attr) {
-			el.setAttribute(attr, val);
+			var names = attr.split(/\s+/);
+			for (var k = 0; k < names.length; k++) { if (names[k]) el.setAttribute(names[k], val); }
 		} else if (el.hasAttribute('data-i18n-html')) {
 			el.innerHTML = val;
 		} else {
@@ -8672,6 +8688,18 @@ function openHistoryModal(){ if(!HIST_VIEW) toggleHistoryView(); }
 function closeHistoryModal(){
   if(document.body.classList.contains('drawer-open')) toggleSide();
 }
+function openSideTo(hist, sectionId){
+  if(viewOn('hide-side') && !document.body.classList.contains('drawer-open')) toggleSide();
+  if(hist){
+    if(!HIST_VIEW) showSideView(true);
+    loadHistory();
+    return;
+  }
+  if(HIST_VIEW) showSideView(false);
+  const d = sectionId ? document.getElementById(sectionId) : null;
+  if(d){ d.open = true; d.scrollIntoView({block:'center'}); }
+}
+function launchHistory(){ openSideTo(true, ''); }
 function fmtHistDate(ms){
   const d = new Date(ms||0);
   try{ return d.toLocaleString([], {dateStyle:'medium', timeStyle:'short'}); }
@@ -10934,6 +10962,10 @@ let TASK_SCRIPTS = [];
 let TASK_JEAN_SCRIPTS = []; 
 let tasksPollTimer = null;
 async function loadTasks(){ renderTasks(await jget('/api/tasks')); }
+function launchTasks(){
+  openSideTo(false, 'tasks-details');
+  loadTasks();
+}
 function ensureTasksPoll(){
   if(TASK_RUNNING && !tasksPollTimer){
     tasksPollTimer = setInterval(loadTasks, 2000);
@@ -10961,6 +10993,12 @@ function renderTasks(r){
   if(TASK_RUNNING) setBadge('tasks-badge', 'warn', t('tasks.status_running'));
   else if(paused && tasksList.length) setBadge('tasks-badge', 'warn', t('tasks.status_paused'));
   else setBadge('tasks-badge', nActive ? true : null, nActive ? nActive+' '+t('tasks.active_label')+(nActive>1?'s':'') : '');
+  const dot = document.getElementById('tasks-act-dot');
+  if(dot){
+    const n = TASK_RUNNING ? '!' : (paused && tasksList.length ? '' : (nActive ? String(nActive) : ''));
+    dot.textContent = n;
+    dot.classList.toggle('on', !!n);
+  }
   const list = document.getElementById('tasks-list');
   list.textContent = '';
   if(!tasksList.length){

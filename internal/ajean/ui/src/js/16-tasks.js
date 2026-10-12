@@ -17,6 +17,13 @@ let tasksPollTimer = null;
 
 async function loadTasks(){ renderTasks(await jget('/api/tasks')); }
 
+// Icône de lancement du mode tiroir : ouvrir le menu directement sur la section
+// Tâches, sans dérouler les réglages, puis rafraîchir la liste.
+function launchTasks(){
+  openSideTo(false, 'tasks-details');
+  loadTasks();
+}
+
 // Tant qu'une tâche tourne, on rafraîchit la liste toutes les 2 s (l'exécution est
 // isolée du fil : sans sondage, on ne verrait ni son démarrage ni sa fin). On
 // arrête le sondage dès qu'aucune tâche ne tourne — pas de poll permanent.
@@ -51,6 +58,15 @@ function renderTasks(r){
   if(TASK_RUNNING) setBadge('tasks-badge', 'warn', t('tasks.status_running'));
   else if(paused && tasksList.length) setBadge('tasks-badge', 'warn', t('tasks.status_paused'));
   else setBadge('tasks-badge', nActive ? true : null, nActive ? nActive+' '+t('tasks.active_label')+(nActive>1?'s':'') : '');
+  // Le panneau étant caché en mode tiroir, le compte des tâches activées est
+  // reporté sur l'icône de lancement : « ! » pendant une exécution, rien quand
+  // tout est suspendu (l'interrupteur maître ne se voit que dans le panneau).
+  const dot = document.getElementById('tasks-act-dot');
+  if(dot){
+    const n = TASK_RUNNING ? '!' : (paused && tasksList.length ? '' : (nActive ? String(nActive) : ''));
+    dot.textContent = n;
+    dot.classList.toggle('on', !!n);
+  }
 
   const list = document.getElementById('tasks-list');
   list.textContent = '';
